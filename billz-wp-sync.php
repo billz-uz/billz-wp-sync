@@ -14,7 +14,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       BILLZ WP Sync
- * Plugin URI:        https://billz.uz
+ * Plugin URI:        https://github.com/billz-uz/billz-wp-sync
  * Description:       
  * Version:           1.0.0
  * Author:            Kharbiyanov Marat
@@ -22,7 +22,7 @@
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       billz-wp-sync
- * GitHub Plugin URI: https://github.com/afragen/github-updater
+ * GitHub Plugin URI: https://github.com/billz-uz/billz-wp-sync
  * Domain Path:       /languages
  */
 
