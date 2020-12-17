@@ -132,14 +132,14 @@ class Billz_Wp_Sync_Products {
 					$obj_variation->set_sale_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : '' );
 					$obj_variation->set_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : $variation['regular_price'] );
 
-					if ( ! apply_filters( 'billz_wp_sync_disable_updating_sku', false ) && isset( $variation['sku'] ) && $variation['sku'] ) {
+					if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_sku', false ) && isset( $variation['sku'] ) && $variation['sku'] ) {
 						$obj_variation->set_sku( $variation['sku'] );
 					}
 
 					$obj_variation->set_manage_stock( true );
 					$obj_variation->set_stock_quantity( $variation['qty'] );
 					$obj_variation->set_stock_status( 'instock' );
-					$disable_updating_attributes = apply_filters( 'billz_wp_sync_disable_updating_attributes', false );
+					$disable_updating_attributes = apply_filters( 'billz_wp_sync_disable_updating_product_attributes', false );
 					if ( ( $disable_updating_attributes && ! $variation_exist ) || ! $disable_updating_attributes ) {
 						$var_attributes = array();
 						foreach ( $variation['attributes'] as $vattribute ) {
@@ -152,7 +152,7 @@ class Billz_Wp_Sync_Products {
 
 					$variation_id = $obj_variation->save();
 
-					if ( ! apply_filters( 'billz_wp_sync_disable_updating_images', false ) && $variation['images'] ) {
+					if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_images', false ) && $variation['images'] ) {
 						update_post_meta( $variation_id, '_thumbnail_id', $variation['images'][0] );
 						array_shift( $variation['images'] );
 						update_post_meta( $variation_id, 'rtwpvg_images', $variation['images'] );
@@ -171,13 +171,13 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-		if ( ! apply_filters( 'billz_wp_sync_disable_updating_name', false ) ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_name', false ) ) {
 			$product->set_name( $args['name'] );
 		}
-		if ( ! apply_filters( 'billz_wp_sync_disable_updating_description', false ) ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_description', false ) ) {
 			$product->set_description( $args['description'] );
 		}
-		if ( ! apply_filters( 'billz_wp_sync_disable_updating_short_description', false ) ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_short_description', false ) ) {
 			$product->set_short_description( $args['short_description'] );
 		}
 		$product->set_status( isset( $args['status'] ) ? $args['status'] : 'publish' );
@@ -193,7 +193,7 @@ class Billz_Wp_Sync_Products {
 			$product->set_height( isset( $args['height'] ) ? $args['height'] : '' );
 		}
 
-		if ( ! apply_filters( 'billz_wp_sync_disable_updating_attributes', false ) && isset( $args['attributes'] ) ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_attributes', false ) && isset( $args['attributes'] ) ) {
 			$product->set_attributes( $this->get_attribute_ids( $args['attributes'] ) );
 		}
 
@@ -205,11 +205,11 @@ class Billz_Wp_Sync_Products {
 				$product->set_menu_order( $args['menu_order'] );
 		}
 
-		if ( ! apply_filters( 'billz_wp_sync_disable_updating_categories', false ) && isset( $args['categories'] ) ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_categories', false ) && isset( $args['categories'] ) ) {
 			$product->set_category_ids( $args['categories'] );
 		}
 
-		if ( ! apply_filters( 'billz_wp_sync_disable_updating_images', false ) && $args['images'] ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_images', false ) && $args['images'] ) {
 			$product->set_image_id( $args['images'][0] );
 			array_shift( $args['images'] );
 			if ( $image_ids ) {
@@ -225,7 +225,7 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-		if ( ! apply_filters( 'billz_wp_sync_disable_updating_taxonomies', false ) && $args['taxonomies'] ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_product_taxonomies', false ) && $args['taxonomies'] ) {
 			foreach ( $args['taxonomies'] as $tax => $terms ) {
 				wp_set_post_terms( $product_id, $terms, $tax, true );
 			}
