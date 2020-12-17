@@ -196,7 +196,7 @@ class Billz_Wp_Sync {
 	}
 
 	private function define_sync_runner_hooks() {
-		$job_name = 'billz_sync';
+		$job_name           = 'billz_sync';
 		$plugin_sync_runner = new Billz_Wp_Sync_Runner( $this->get_plugin_name(), $this->get_version(), $job_name, 60, 'BILLZ' );
 
 		$this->loader->add_filter( 'wc_product_has_unique_sku', $plugin_sync_runner, 'disable_unique_sku' );

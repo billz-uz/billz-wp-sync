@@ -48,16 +48,16 @@ class Billz_Wp_Sync_Runner {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of the plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param      string $plugin_name       The name of the plugin.
+	 * @param      string $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version, $job_name, $job_repeate_time, $job_group ) {
 
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
-		$this->job_name = $job_name;
+		$this->plugin_name      = $plugin_name;
+		$this->version          = $version;
+		$this->job_name         = $job_name;
 		$this->job_repeate_time = $job_repeate_time;
-		$this->job_group = $job_group;
+		$this->job_group        = $job_group;
 
 	}
 
@@ -78,7 +78,7 @@ class Billz_Wp_Sync_Runner {
 	}
 
 	public function run_sync_job() {
-		new Billz_Wp_Sync_Products($this->plugin_name, $this->version);
+		new Billz_Wp_Sync_Products( $this->plugin_name, $this->version );
 	}
 
 }

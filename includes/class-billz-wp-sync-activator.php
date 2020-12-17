@@ -33,7 +33,7 @@ class Billz_Wp_Sync_Activator {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . BILLZ_WP_SYNC_PRODUCTS_TABLE;
-		
+
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$sql = "CREATE TABLE $table_name (
@@ -59,7 +59,7 @@ class Billz_Wp_Sync_Activator {
 			state smallint(6) NOT NULL DEFAULT '0'
 		) $charset_collate;";
 
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
 
 		add_option( 'billz_wp_sync_version', BILLZ_WP_SYNC_VERSION );

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The plugin bootstrap file
  *
@@ -15,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       BILLZ WP Sync
  * Plugin URI:        https://github.com/billz-uz/billz-wp-sync
- * Description:       
+ * Description:
  * Version:           1.0.0
  * Author:            Kharbiyanov Marat
  * Author URI:        https://billz.uz
