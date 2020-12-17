@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The public-facing functionality of the plugin.
  *
@@ -121,34 +120,39 @@ class Billz_Wp_Sync_Products {
 					$variation_id = $this->get_variation_id_by( '_remote_product_id', $variation['remote_product_id'], $product_id );
 
 					if ( $variation_id ) {
-						$objVariation = wc_get_product( $variation_id );
+						$obj_variation   = wc_get_product( $variation_id );
+						$variation_exist = true;
 					} else {
-						$objVariation = new WC_Product_Variation();
+						$obj_variation   = new WC_Product_Variation();
+						$variation_exist = false;
 					}
 
-					$objVariation->set_parent_id( $product_id );
+					$obj_variation->set_parent_id( $product_id );
+					$obj_variation->set_regular_price( $variation['regular_price'] );
+					$obj_variation->set_sale_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : '' );
+					$obj_variation->set_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : $variation['regular_price'] );
 
-					$objVariation->set_regular_price( $variation['regular_price'] );
-						$objVariation->set_sale_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : '' );
-						$objVariation->set_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : $variation['regular_price'] );
-
-					if ( isset( $variation['sku'] ) && $variation['sku'] ) {
-						$objVariation->set_sku( $variation['sku'] );
+					if ( ! apply_filters( 'billz_wp_sync_disable_updating_sku', false ) && isset( $variation['sku'] ) && $variation['sku'] ) {
+						$obj_variation->set_sku( $variation['sku'] );
 					}
 
-					$objVariation->set_manage_stock( true );
-					$objVariation->set_stock_quantity( $variation['qty'] );
-					$objVariation->set_stock_status( 'instock' );
-					$var_attributes = array();
-					foreach ( $variation['attributes'] as $vattribute ) {
-						$taxonomy                    = 'pa_' . $vattribute['name'];
-						$attr_val_slug               = wc_sanitize_taxonomy_name( stripslashes( $vattribute['option'] ) );
-						$var_attributes[ $taxonomy ] = $attr_val_slug;
+					$obj_variation->set_manage_stock( true );
+					$obj_variation->set_stock_quantity( $variation['qty'] );
+					$obj_variation->set_stock_status( 'instock' );
+					$disable_updating_attributes = apply_filters( 'billz_wp_sync_disable_updating_attributes', false );
+					if ( ( $disable_updating_attributes && ! $variation_exist ) || ! $disable_updating_attributes ) {
+						$var_attributes = array();
+						foreach ( $variation['attributes'] as $vattribute ) {
+							$taxonomy                    = 'pa_' . $vattribute['name'];
+							$attr_val_slug               = wc_sanitize_taxonomy_name( stripslashes( $vattribute['option'] ) );
+							$var_attributes[ $taxonomy ] = $attr_val_slug;
+						}
+						$obj_variation->set_attributes( $var_attributes );
 					}
-					$objVariation->set_attributes( $var_attributes );
-					$variation_id = $objVariation->save();
 
-					if ( $variation['images'] ) {
+					$variation_id = $obj_variation->save();
+
+					if ( ! apply_filters( 'billz_wp_sync_disable_updating_images', false ) && $variation['images'] ) {
 						update_post_meta( $variation_id, '_thumbnail_id', $variation['images'][0] );
 						array_shift( $variation['images'] );
 						update_post_meta( $variation_id, 'rtwpvg_images', $variation['images'] );
@@ -167,23 +171,29 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_name', false ) ) {
 			$product->set_name( $args['name'] );
+		}
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_description', false ) ) {
 			$product->set_description( $args['description'] );
+		}
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_short_description', false ) ) {
 			$product->set_short_description( $args['short_description'] );
-			$product->set_status( isset( $args['status'] ) ? $args['status'] : 'publish' );
-			$product->set_catalog_visibility( isset( $args['visibility'] ) ? $args['visibility'] : 'visible' );
+		}
+		$product->set_status( isset( $args['status'] ) ? $args['status'] : 'publish' );
+		$product->set_catalog_visibility( isset( $args['visibility'] ) ? $args['visibility'] : 'visible' );
 
 		if ( $args['type'] == 'simple' ) {
 			$product->set_regular_price( $args['regular_price'] );
-				$product->set_sale_price( isset( $args['sale_price'] ) ? $args['sale_price'] : '' );
-				$product->set_price( isset( $args['sale_price'] ) ? $args['sale_price'] : $args['regular_price'] );
-				$product->set_weight( isset( $args['weight'] ) ? $args['weight'] : '' );
-				$product->set_length( isset( $args['length'] ) ? $args['length'] : '' );
-				$product->set_width( isset( $args['width'] ) ? $args['width'] : '' );
-				$product->set_height( isset( $args['height'] ) ? $args['height'] : '' );
+			$product->set_sale_price( isset( $args['sale_price'] ) ? $args['sale_price'] : '' );
+			$product->set_price( isset( $args['sale_price'] ) ? $args['sale_price'] : $args['regular_price'] );
+			$product->set_weight( isset( $args['weight'] ) ? $args['weight'] : '' );
+			$product->set_length( isset( $args['length'] ) ? $args['length'] : '' );
+			$product->set_width( isset( $args['width'] ) ? $args['width'] : '' );
+			$product->set_height( isset( $args['height'] ) ? $args['height'] : '' );
 		}
 
-		if ( isset( $args['attributes'] ) ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_attributes', false ) && isset( $args['attributes'] ) ) {
 			$product->set_attributes( $this->get_attribute_ids( $args['attributes'] ) );
 		}
 
@@ -195,11 +205,11 @@ class Billz_Wp_Sync_Products {
 				$product->set_menu_order( $args['menu_order'] );
 		}
 
-		if ( isset( $args['categories'] ) ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_categories', false ) && isset( $args['categories'] ) ) {
 			$product->set_category_ids( $args['categories'] );
 		}
 
-		if ( $args['images'] ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_images', false ) && $args['images'] ) {
 			$product->set_image_id( $args['images'][0] );
 			array_shift( $args['images'] );
 			if ( $image_ids ) {
@@ -207,7 +217,7 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-			$product_id = $product->save();
+		$product_id = $product->save();
 
 		if ( $args['meta'] ) {
 			foreach ( $args['meta'] as $meta_key => $meta_value ) {
@@ -215,7 +225,7 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-		if ( $args['taxonomies'] ) {
+		if ( ! apply_filters( 'billz_wp_sync_disable_updating_taxonomies', false ) && $args['taxonomies'] ) {
 			foreach ( $args['taxonomies'] as $tax => $terms ) {
 				wp_set_post_terms( $product_id, $terms, $tax, true );
 			}
@@ -242,21 +252,21 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-			$product->set_name( $args['name'] );
-			$product->set_description( $args['description'] );
-			$product->set_short_description( $args['short_description'] );
-			$product->set_status( isset( $args['status'] ) ? $args['status'] : 'publish' );
-			$product->set_catalog_visibility( isset( $args['visibility'] ) ? $args['visibility'] : 'visible' );
+		$product->set_name( $args['name'] );
+		$product->set_description( $args['description'] );
+		$product->set_short_description( $args['short_description'] );
+		$product->set_status( isset( $args['status'] ) ? $args['status'] : 'publish' );
+		$product->set_catalog_visibility( isset( $args['visibility'] ) ? $args['visibility'] : 'visible' );
 
 		if ( $args['type'] == 'simple' ) {
 			$product->set_regular_price( $args['regular_price'] );
-				$product->set_sale_price( isset( $args['sale_price'] ) ? $args['sale_price'] : '' );
-				$product->set_price( isset( $args['sale_price'] ) ? $args['sale_price'] : $args['regular_price'] );
-				$product->set_weight( isset( $args['weight'] ) ? $args['weight'] : '' );
-				$product->set_length( isset( $args['length'] ) ? $args['length'] : '' );
-				$product->set_width( isset( $args['width'] ) ? $args['width'] : '' );
-				$product->set_height( isset( $args['height'] ) ? $args['height'] : '' );
-				$product->set_manage_stock( true );
+			$product->set_sale_price( isset( $args['sale_price'] ) ? $args['sale_price'] : '' );
+			$product->set_price( isset( $args['sale_price'] ) ? $args['sale_price'] : $args['regular_price'] );
+			$product->set_weight( isset( $args['weight'] ) ? $args['weight'] : '' );
+			$product->set_length( isset( $args['length'] ) ? $args['length'] : '' );
+			$product->set_width( isset( $args['width'] ) ? $args['width'] : '' );
+			$product->set_height( isset( $args['height'] ) ? $args['height'] : '' );
+			$product->set_manage_stock( true );
 			$product->set_stock_quantity( $args['qty'] );
 			$product->set_stock_status( 'instock' );
 		}
@@ -266,11 +276,11 @@ class Billz_Wp_Sync_Products {
 		}
 
 		if ( isset( $args['default_attributes'] ) ) {
-				$product->set_default_attributes( $args['default_attributes'] );
+			$product->set_default_attributes( $args['default_attributes'] );
 		}
 
 		if ( isset( $args['menu_order'] ) ) {
-				$product->set_menu_order( $args['menu_order'] );
+			$product->set_menu_order( $args['menu_order'] );
 		}
 
 		if ( isset( $args['categories'] ) ) {
@@ -285,7 +295,7 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-			$product_id = $product->save();
+		$product_id = $product->save();
 
 		if ( ! empty( $args['user_id'] ) ) {
 			wp_update_post(
@@ -310,28 +320,28 @@ class Billz_Wp_Sync_Products {
 
 		if ( ! empty( $args['variations'] ) ) {
 			foreach ( $args['variations'] as $variation ) {
-				$objVariation = new WC_Product_Variation();
-				$objVariation->set_parent_id( $product_id );
+				$obj_variation = new WC_Product_Variation();
+				$obj_variation->set_parent_id( $product_id );
 
-				$objVariation->set_regular_price( $variation['regular_price'] );
-					$objVariation->set_sale_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : '' );
-					$objVariation->set_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : $variation['regular_price'] );
+				$obj_variation->set_regular_price( $variation['regular_price'] );
+				$obj_variation->set_sale_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : '' );
+				$obj_variation->set_price( isset( $variation['sale_price'] ) ? $variation['sale_price'] : $variation['regular_price'] );
 
 				if ( isset( $variation['sku'] ) && $variation['sku'] ) {
-					$objVariation->set_sku( $variation['sku'] );
+					$obj_variation->set_sku( $variation['sku'] );
 				}
 
-				$objVariation->set_manage_stock( true );
-				$objVariation->set_stock_quantity( $variation['qty'] );
-				$objVariation->set_stock_status( 'instock' );
+				$obj_variation->set_manage_stock( true );
+				$obj_variation->set_stock_quantity( $variation['qty'] );
+				$obj_variation->set_stock_status( 'instock' );
 				$var_attributes = array();
 				foreach ( $variation['attributes'] as $vattribute ) {
 					$taxonomy                    = 'pa_' . wc_sanitize_taxonomy_name( stripslashes( $vattribute['name'] ) );
 					$attr_val_slug               = wc_sanitize_taxonomy_name( stripslashes( $vattribute['option'] ) );
 					$var_attributes[ $taxonomy ] = $attr_val_slug;
 				}
-				$objVariation->set_attributes( $var_attributes );
-				$variation_id = $objVariation->save();
+				$obj_variation->set_attributes( $var_attributes );
+				$variation_id = $obj_variation->save();
 
 				if ( $variation['images'] ) {
 					update_post_meta( $variation_id, '_thumbnail_id', $variation['images'][0] );
@@ -352,14 +362,14 @@ class Billz_Wp_Sync_Products {
 		}
 
 		if ( isset( $args['remote_product_id'] ) ) {
-					update_post_meta( $product_id, '_remote_product_id', $args['remote_product_id'] );
+			update_post_meta( $product_id, '_remote_product_id', $args['remote_product_id'] );
 		}
 
 		if ( isset( $args['grouping_value'] ) ) {
 			update_post_meta( $product_id, '_billz_grouping_value', $args['grouping_value'] );
 		}
 
-			return $product_id;
+		return $product_id;
 	}
 
 	private function get_attribute_ids( $attributes ) {
