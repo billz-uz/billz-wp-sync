@@ -8,7 +8,7 @@
  * that starts the plugin.
  *
  * @link              https://billz.uz
- * @since             1.0.1
+ * @since             2.0.0
  * @package           Billz_Wp_Sync
  *
  * @wordpress-plugin
