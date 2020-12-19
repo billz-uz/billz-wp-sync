@@ -65,6 +65,8 @@ register_deactivation_hook( __FILE__, 'deactivate_billz_wp_sync' );
  */
 require plugin_dir_path( __FILE__ ) . 'includes/class-billz-wp-sync.php';
 
+require plugin_dir_path( __FILE__ ) . 'includes/vendor/plugin-update-checker/plugin-update-checker.php';
+
 /**
  * Begins execution of the plugin.
  *
@@ -79,5 +81,12 @@ function run_billz_wp_sync() {
 	$plugin = new Billz_Wp_Sync();
 	$plugin->run();
 
+	$update_checker = Puc_v4_Factory::buildUpdateChecker(
+		'https://github.com/billz-uz/billz-wp-sync/',
+		__FILE__,
+		'billz-wp-sync'
+	);
+
+	$update_checker->getVcsApi()->enableReleaseAssets();
 }
 run_billz_wp_sync();
