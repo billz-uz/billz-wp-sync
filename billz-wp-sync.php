@@ -15,7 +15,7 @@
  * Plugin Name:       BILLZ WP Sync
  * Plugin URI:        https://github.com/billz-uz/billz-wp-sync
  * Description:
- * Version:           1.0.1
+ * Version:           1.0.0
  * Author:            Kharbiyanov Marat
  * Author URI:        https://billz.uz
  * License:           GPL-2.0+
