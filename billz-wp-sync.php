@@ -8,14 +8,14 @@
  * that starts the plugin.
  *
  * @link              https://billz.uz
- * @since             2.0.0
+ * @since             1.0.0
  * @package           Billz_Wp_Sync
  *
  * @wordpress-plugin
  * Plugin Name:       BILLZ WP Sync
  * Plugin URI:        https://github.com/billz-uz/billz-wp-sync
  * Description:
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Kharbiyanov Marat
  * Author URI:        https://billz.uz
  * License:           GPL-2.0+
