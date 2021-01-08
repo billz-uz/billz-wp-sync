@@ -56,6 +56,7 @@ class Billz_Wp_Sync_Activator {
 			taxonomies longtext NOT NULL,
 			attributes longtext NOT NULL,
 			variations longtext NOT NULL,
+			menu_order int(11) NOT NULL DEFAULT '0',
 			state smallint(6) NOT NULL DEFAULT '0'
 		) $charset_collate;";
 
