@@ -39,6 +39,7 @@ class Billz_Wp_Sync_Activator {
 			ID bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 			created datetime NOT NULL,
 			imported datetime NOT NULL,
+			status varchar(20) NOT NULL DEFAULT 'publish',
 			user_id bigint(20) NOT NULL,
 			remote_product_id text NOT NULL,
 			type varchar(255) NOT NULL,
