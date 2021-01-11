@@ -68,11 +68,13 @@ class Billz_Wp_Sync_Products {
 				$product['attributes'] = ! empty( $product['attributes'] ) ? unserialize( $product['attributes'] ) : '';
 				$product['variations'] = ! empty( $product['variations'] ) ? unserialize( $product['variations'] ) : '';
 				$product['taxonomies'] = ! empty( $product['taxonomies'] ) ? unserialize( $product['taxonomies'] ) : '';
+				$product['meta']       = ! empty( $product['meta'] ) ? unserialize( $product['meta'] ) : '';
 
 				$exist_product = $this->get_exist_product( $product );
 
 				if ( $exist_product ) {
-					/*if ( 'simple' === $exist_product['type']
+					/*
+					if ( 'simple' === $exist_product['type']
 						&& ( 'variable' === $product['type'] || $exist_product['remote_product_id'] !== $product['remote_product_id'] ) ) {
 							$exist_simple_product    = wc_get_product( $exist_product['ID'] );
 							$product['variations'][] = array(
