@@ -37,6 +37,7 @@ if ( ! defined( 'WPINC' ) ) {
  */
 define( 'BILLZ_WP_SYNC_VERSION', '1.0.0' );
 define( 'BILLZ_WP_SYNC_PRODUCTS_TABLE', 'billz_sync_products' );
+define( 'BILLZ_WP_SYNC_DATE_FORMAT', 'Y-m-d\TH:i:s\Z' );
 
 /**
  * The code that runs during plugin activation.
