@@ -111,6 +111,7 @@ class Billz_Wp_Sync {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-billz-wp-sync-i18n.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-billz-wp-sync-functions.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-billz-wp-sync-products.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-billz-wp-sync-transactions.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-billz-wp-sync-runner.php';
 
 		/**
@@ -203,6 +204,17 @@ class Billz_Wp_Sync {
 		$this->loader->add_action( 'init', $plugin_sync_runner, 'disable_default_runner' );
 		$this->loader->add_action( 'init', $plugin_sync_runner, 'init_sync_job' );
 		$this->loader->add_action( $job_name, $plugin_sync_runner, 'run_sync_job' );
+
+		$plugin_sync_transactions = new Billz_Wp_Sync_Transactions( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'add_meta_boxes', $plugin_sync_transactions, 'add_meta_boxes' );
+		$this->loader->add_action( 'wp_ajax_billz_wp_sync_create_transaction', $plugin_sync_transactions, 'create_transaction_ajax' );
+
+		$this->loader->add_action( 'woocommerce_admin_order_item_headers', $plugin_sync_transactions, 'woocommerce_admin_order_item_headers' );
+		$this->loader->add_action( 'woocommerce_admin_order_item_values', $plugin_sync_transactions, 'woocommerce_admin_order_item_values', 10, 3 );
+		$this->loader->add_action( 'woocommerce_hidden_order_itemmeta', $plugin_sync_transactions, 'woocommerce_hidden_order_itemmeta' );
+		$this->loader->add_action( 'save_post_shop_order', $plugin_sync_transactions, 'save_post_shop_order' );
+		$this->loader->add_action( 'pre_post_update', $plugin_sync_transactions, 'pre_post_update' );
 	}
 
 }
