@@ -98,7 +98,7 @@ class Billz_Wp_Sync_Products {
 							);
 							wp_set_object_terms( $exist_product['ID'], 'variable', 'product_type' );
 					}*/
-
+					
 					if ( 'variable' === $exist_product['type'] ) {
 						$product['type']              = 'variable';
 						$product['remote_product_id'] = '';
@@ -389,7 +389,7 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-		if ( ! empty( $args['variations'] ) ) {
+		if ( ! empty( $args['variations'] ) && 'variable' === $args['type'] ) {
 			foreach ( $args['variations'] as $variation ) {
 				$obj_variation = new WC_Product_Variation();
 				$obj_variation->set_parent_id( $product_id );
