@@ -111,7 +111,9 @@ class Billz_Wp_Sync_Products {
 					}
 					$product_id = $this->update_product( $exist_product, $product );
 				} else {
-					$product_id = $this->create_product( $product );
+					if ( ! empty( $product['images'] ) || apply_filters( 'billz_wp_sync_create_product_without_images', false )  ) {
+						$product_id = $this->create_product( $product );
+					}
 				}
 				$this->wpdb->update(
 					$this->products_table_name,
@@ -122,12 +124,8 @@ class Billz_Wp_Sync_Products {
 					array( 'ID' => $product['ID'] )
 				);
 			}
-			$this->tg_notify( 'Синхронизовано: ' . count( $products ) . ' товаров.' );
+			do_action( 'billz_wp_sync_sync_complete', $products );
 		}
-	}
-
-	private function tg_notify( $msg ) {
-		wp_remote_get( 'https://api.telegram.org/bot1491973566:AAGWeL5_tDvUn6-iCuZVfYbgeAHTf3Ppsjc/sendMessage?chat_id=2498928&text=' . $msg );
 	}
 
 	private function get_exist_product( $product ) {

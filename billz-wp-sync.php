@@ -15,7 +15,7 @@
  * Plugin Name:       BILLZ WP Sync
  * Plugin URI:        https://github.com/billz-uz/billz-wp-sync
  * Description:
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Kharbiyanov Marat
  * Author URI:        https://billz.uz
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'BILLZ_WP_SYNC_VERSION', '1.0.0' );
+define( 'BILLZ_WP_SYNC_VERSION', '1.0.1' );
 define( 'BILLZ_WP_SYNC_PRODUCTS_TABLE', 'billz_sync_products' );
 define( 'BILLZ_WP_SYNC_DATE_FORMAT', 'Y-m-d\TH:i:s\Z' );
 
