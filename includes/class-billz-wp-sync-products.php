@@ -111,7 +111,9 @@ class Billz_Wp_Sync_Products {
 					}
 					$product_id = $this->update_product( $exist_product, $product );
 				} else {
-					$product_id = $this->create_product( $product );
+					if ( ! empty( $product['images'] ) || apply_filters( 'billz_wp_sync_create_product_without_images', false )  ) {
+						$product_id = $this->create_product( $product );
+					}
 				}
 				$this->wpdb->update(
 					$this->products_table_name,
