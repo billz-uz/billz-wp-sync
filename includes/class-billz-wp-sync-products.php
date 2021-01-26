@@ -320,6 +320,8 @@ class Billz_Wp_Sync_Products {
 				$product->set_sku( $args['sku'] );
 			}
 		}
+		
+		$product_id = $product->save();
 
 		$product->set_name( $args['name'] );
 		$product->set_description( $args['description'] );
@@ -364,7 +366,7 @@ class Billz_Wp_Sync_Products {
 			}
 		}
 
-		$product_id = $product->save();
+		$product->save();
 
 		if ( ! empty( $args['user_id'] ) ) {
 			wp_update_post(
@@ -446,7 +448,7 @@ class Billz_Wp_Sync_Products {
 		$position = 0;
 
 		foreach ( $attributes as $taxonomy => $values ) {
-			if ( ! taxonomy_exists( $taxonomy ) ) {
+			if ( ! taxonomy_exists( $taxonomy ) || empty( $values['term_names'] ) ) {
 				continue;
 			}
 
@@ -462,7 +464,12 @@ class Billz_Wp_Sync_Products {
 				if ( term_exists( $term_name, $taxonomy ) ) {
 					$term_ids[] = get_term_by( 'name', $term_name, $taxonomy )->term_id;
 				} else {
-					$term       = wp_insert_term( $term_name, $taxonomy, array( 'slug' => sanitize_title( $attr ) ) );
+					$term       = wp_insert_term( $term_name, $taxonomy, array( 'slug' => sanitize_title( $term_name ) ) );
+					if ( is_wp_error( $term ) ) {
+						$logger = wc_get_logger();
+						$logger->info( $term->get_error_message(), array( 'source' => 'billz-wp-sync-error' ) );
+						continue;
+					}
 					$term_ids[] = $term['term_id'];
 				}
 			}
@@ -480,6 +487,7 @@ class Billz_Wp_Sync_Products {
 
 			$position++;
 		}
+
 		return $data;
 	}
 
