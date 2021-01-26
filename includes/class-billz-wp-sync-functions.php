@@ -72,7 +72,7 @@ function billz_wp_sync_get_image_ids( $images ) {
 			$upload = wc_rest_upload_image_from_url( $image_url );
 			if ( is_wp_error( $upload ) ) {
 				$logger = wc_get_logger();
-				$logger->info( $upload->get_error_message(), array( 'source' => 'billz-failed-sync-products' ) );
+				$logger->info( $upload->get_error_message(), array( 'source' => 'billz-wp-sync-error' ) );
 				continue;
 			} else {
 				$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload );
