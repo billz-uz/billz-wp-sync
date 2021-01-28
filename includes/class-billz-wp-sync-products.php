@@ -89,25 +89,18 @@ class Billz_Wp_Sync_Products {
 							$product['sale_price']        = '';
 							$product['images']            = array_merge( $product['images'], $exist_remote_product['images'] );
 							$product['variations']        = array_merge( $product['variations'], $exist_remote_product['variations'] );
+							$product['attributes']        = array_merge_recursive( (array) $product['attributes'], (array) $exist_remote_product['attributes'] );
 
-							$product['attributes'] = array_merge_recursive( (array) $product['attributes'], (array) $exist_remote_product['attributes'] );
+							$uniq_var_func = 123;
 
-							$product['attributes'] = (object) array_map(
-								function( $attr ) {
-									$attr['term_names']    = array_unique( ￼$attr['term_names'] );
-									$attr['is_visible']    = (bool) array_unique( ￼$attr['is_visible'] )[0];
-									$attr['for_variation'] = (bool) array_unique( ￼$attr['for_variation'] )[0];
-									return $attr;
-								},
-								$product['attributes']
-							);
+							$product['attributes'] = (object) array_map( function( $attr ) {
+								$attr['term_names']    = array_unique( $attr['term_names'] );
+								$attr['is_visible']    = (bool) array_unique( $attr['is_visible'] )[0];
+								$attr['for_variation'] = (bool) array_unique( $attr['for_variation'] )[0];
+								return $attr;
+							}, $product['attributes'] );
 
 							wp_trash_post( $exist_product['ID'] );
-
-							/*
-							print_r($product);
-							die;
-							*/
 
 							$product_id = $this->create_product( $product );
 						}
