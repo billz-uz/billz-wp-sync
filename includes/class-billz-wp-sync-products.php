@@ -73,45 +73,49 @@ class Billz_Wp_Sync_Products {
 				$exist_product = $this->get_exist_product( $product );
 
 				if ( $exist_product ) {
-					/*
-					if ( 'simple' === $exist_product['type']
-						&& ( 'variable' === $product['type'] || $exist_product['remote_product_id'] !== $product['remote_product_id'] ) ) {
-							$exist_simple_product    = wc_get_product( $exist_product['ID'] );
-							$product['variations'][] = array(
-								'remote_product_id' => $exist_product['remote_product_id'],
-								'regular_price'     => $exist_simple_product->get_regular_price(),
-								'sale_price'        => $sale,
-								'sku'               => $product['sku'],
-								'attributes'        => array(
-									array(
-										'name'   => 'size',
-										'option' => $product['properties']['SIZE'],
-									),
-									array(
-										'name'   => 'color',
-										'option' => $product['properties']['COLOR'],
-									),
-								),
-								'qty'               => $product['qty'],
-								'images'            => $images,
-								'meta'              => array(),
+					if ( 'simple' === $exist_product['type'] && ( 'variable' === $product['type'] || $exist_product['remote_product_id'] !== $product['remote_product_id'] ) ) {
+						$exist_remote_product = $this->get_exist_remote_product( $exist_product['remote_product_id'] );
+
+						if ( $exist_remote_product ) {
+							$exist_remote_product['images']     = ! empty( $exist_remote_product['images'] ) ? unserialize( $exist_remote_product['images'] ) : '';
+							$exist_remote_product['attributes'] = ! empty( $exist_remote_product['attributes'] ) ? unserialize( $exist_remote_product['attributes'] ) : '';
+							$exist_remote_product['variations'] = ! empty( $exist_remote_product['variations'] ) ? unserialize( $exist_remote_product['variations'] ) : '';
+
+							$product['type']              = 'variable';
+							$product['remote_product_id'] = '';
+							$product['sku']               = '';
+							$product['qty']               = '';
+							$product['regular_price']     = '';
+							$product['sale_price']        = '';
+							$product['images']            = array_merge( $product['images'], $exist_remote_product['images'] );
+							$product['variations']        = array_merge( $product['variations'], $exist_remote_product['variations'] );
+
+							$product['attributes'] = array_merge_recursive( (array) $product['attributes'], (array) $exist_remote_product['attributes'] );
+
+							$product['attributes'] = (object) array_map(
+								function( $attr ) {
+									$attr['term_names']    = array_unique( ￼$attr['term_names'] );
+									$attr['is_visible']    = (bool) array_unique( ￼$attr['is_visible'] )[0];
+									$attr['for_variation'] = (bool) array_unique( ￼$attr['for_variation'] )[0];
+									return $attr;
+								},
+								$product['attributes']
 							);
-							wp_set_object_terms( $exist_product['ID'], 'variable', 'product_type' );
-					}*/
-					
-					if ( 'variable' === $exist_product['type'] ) {
-						$product['type']              = 'variable';
-						$product['remote_product_id'] = '';
-						$product['sku']               = '';
-						$product['qty']               = '';
-						$product['regular_price']     = '';
-						$product['sale_price']        = '';
+
+							wp_trash_post( $exist_product['ID'] );
+
+							/*
+							print_r($product);
+							die;
+							*/
+
+							$product_id = $this->create_product( $product );
+						}
 					} else {
-						$product['variations'] = '';
+						$product_id = $this->update_product( $exist_product, $product );
 					}
-					$product_id = $this->update_product( $exist_product, $product );
 				} else {
-					if ( ! empty( $product['images'] ) || apply_filters( 'billz_wp_sync_create_product_without_images', false )  ) {
+					if ( ! empty( $product['images'] ) || apply_filters( 'billz_wp_sync_create_product_without_images', false ) ) {
 						$product_id = $this->create_product( $product );
 					}
 				}
@@ -133,7 +137,9 @@ class Billz_Wp_Sync_Products {
 		if ( ! $remote_product_id ) {
 			$remote_product_id = $product['variations'][0]['remote_product_id'];
 		}
-		$product = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT p.ID, p.post_parent, (select meta_value from {$this->wpdb->postmeta} where post_id = p.id and meta_key = '_remote_product_id') as remote_product_id FROM {$this->wpdb->posts} p LEFT JOIN {$this->wpdb->postmeta} m on(p.id = m.post_id) WHERE m.meta_key='_remote_product_id' AND m.meta_value='%s' AND p.post_type IN('product', 'product_variation') AND (p.post_status = 'publish' OR p.post_status = 'draft')", $remote_product_id ) );
+
+		$product = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT p.ID, p.post_parent, (select meta_value from {$this->wpdb->postmeta} where post_id = p.id and meta_key = '_remote_product_id') as remote_product_id FROM {$this->wpdb->posts} p LEFT JOIN {$this->wpdb->postmeta} m on(p.id = m.post_id) WHERE ((m.meta_key='_remote_product_id' AND m.meta_value='%s') OR (m.meta_key = '_billz_grouping_value' AND m.meta_value = '%s')) AND p.post_type IN('product', 'product_variation') AND (p.post_status = 'publish' OR p.post_status = 'draft') ORDER BY p.ID DESC LIMIT 1", $remote_product_id, $product['grouping_value'] ) );
+
 		if ( ! $product ) {
 			return false;
 		} elseif ( $product->post_parent ) {
@@ -155,6 +161,15 @@ class Billz_Wp_Sync_Products {
 		$product_id = $this->wpdb->get_var( $this->wpdb->prepare( "SELECT p.ID FROM {$this->wpdb->posts} p LEFT JOIN {$this->wpdb->postmeta} m on(p.id = m.post_id) WHERE m.meta_key='%s' AND m.meta_value='%s' AND p.post_type = '%s' AND p.post_parent = '%s' LIMIT 1", $by, $value, 'product_variation', $parent_id ) );
 		if ( $product_id ) {
 			return $product_id;
+		} else {
+			return false;
+		}
+	}
+
+	private function get_exist_remote_product( $remote_product_id ) {
+		$product = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM $this->products_table_name WHERE remote_product_id = '%s' AND state = 1 ORDER BY ID DESC LIMIT 1", $remote_product_id ), ARRAY_A );
+		if ( $product ) {
+			return $product;
 		} else {
 			return false;
 		}
@@ -320,7 +335,7 @@ class Billz_Wp_Sync_Products {
 				$product->set_sku( $args['sku'] );
 			}
 		}
-		
+
 		$product_id = $product->save();
 
 		$product->set_name( $args['name'] );
@@ -464,7 +479,7 @@ class Billz_Wp_Sync_Products {
 				if ( term_exists( $term_name, $taxonomy ) ) {
 					$term_ids[] = get_term_by( 'name', $term_name, $taxonomy )->term_id;
 				} else {
-					$term       = wp_insert_term( $term_name, $taxonomy, array( 'slug' => sanitize_title( $term_name ) ) );
+					$term = wp_insert_term( $term_name, $taxonomy, array( 'slug' => sanitize_title( $term_name ) ) );
 					if ( is_wp_error( $term ) ) {
 						$logger = wc_get_logger();
 						$logger->info( $term->get_error_message(), array( 'source' => 'billz-wp-sync-error' ) );
