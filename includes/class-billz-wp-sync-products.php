@@ -172,6 +172,10 @@ class Billz_Wp_Sync_Products {
 		$product_id = $exist_product['ID'];
 		$product    = wc_get_product( $product_id );
 
+		if ( isset( $args['sku'] ) ) {
+			$product->set_sku( $args['sku'] );
+		}
+
 		if ( 'variable' === $args['type'] ) {
 			if ( $args['variations'] ) {
 				foreach ( $args['variations'] as $variation ) {
@@ -324,9 +328,10 @@ class Billz_Wp_Sync_Products {
 			$product = new WC_Product_Variable();
 		} else {
 			$product = new WC_Product();
-			if ( isset( $args['sku'] ) ) {
-				$product->set_sku( $args['sku'] );
-			}
+		}
+
+		if ( isset( $args['sku'] ) ) {
+			$product->set_sku( $args['sku'] );
 		}
 
 		$product_id = $product->save();
