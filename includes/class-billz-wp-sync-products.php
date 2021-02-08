@@ -105,6 +105,9 @@ class Billz_Wp_Sync_Products {
 							$product_id = $this->create_product( $product );
 						}
 					} else {
+						if ( 'variable' === $exist_product['type'] && 'simple' === $product['type'] ) {
+							$product['type'] = 'variable';
+						}
 						$product_id = $this->update_product( $exist_product, $product );
 					}
 				} else {
@@ -131,7 +134,7 @@ class Billz_Wp_Sync_Products {
 			$remote_product_id = $product['variations'][0]['remote_product_id'];
 		}
 
-		$exist_product = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT p.ID, p.post_parent, (select meta_value from {$this->wpdb->postmeta} where post_id = p.id and meta_key = '_remote_product_id') as remote_product_id FROM {$this->wpdb->posts} p LEFT JOIN {$this->wpdb->postmeta} m on(p.id = m.post_id) WHERE ((m.meta_key='_remote_product_id' AND m.meta_value='%s') OR (m.meta_key = '_billz_grouping_value' AND m.meta_value = '%s')) AND p.post_type IN('product', 'product_variation') AND (p.post_status = 'publish' OR p.post_status = 'draft') ORDER BY p.ID DESC LIMIT 1", $remote_product_id, $product['grouping_value'] ) );
+		$exist_product = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT p.ID, p.post_parent, (select meta_value from {$this->wpdb->postmeta} where post_id = p.id and meta_key = '_remote_product_id') as remote_product_id FROM {$this->wpdb->posts} p LEFT JOIN {$this->wpdb->postmeta} m on(p.id = m.post_id) WHERE ((m.meta_key='_remote_product_id' AND m.meta_value='%s') OR (m.meta_key = '_billz_grouping_value' AND m.meta_value = '%s')) AND p.post_type IN('product', 'product_variation') AND (p.post_status = 'publish' OR p.post_status = 'draft') ORDER BY p.ID ASC LIMIT 1", $remote_product_id, $product['grouping_value'] ) );
 		if ( ! $exist_product ) {
 			return false;
 		} elseif ( intval( $exist_product->post_parent ) === 0 ) {
