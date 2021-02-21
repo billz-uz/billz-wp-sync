@@ -301,7 +301,7 @@ class Billz_Wp_Sync_Transactions {
 	}
 
 	public function woocommerce_admin_order_item_values( $product, $item, $item_id ) {
-		if ( is_null( $product ) ) {
+		if ( empty( $product ) ) {
 			echo '<td class="shop"></td>';
 		} else {
 			$product_id       = $product->get_id();

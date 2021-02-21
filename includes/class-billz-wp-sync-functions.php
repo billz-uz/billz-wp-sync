@@ -10,6 +10,7 @@ function billz_wp_sync_get_category_ids( $cats ) {
 		$category_title_3 = isset( $cat['category_3'] ) ? $cat['category_3'] : '';
 		$category_title_4 = isset( $cat['category_4'] ) ? $cat['category_4'] : '';
 		$category_title_5 = isset( $cat['category_5'] ) ? $cat['category_5'] : '';
+		$category_title_6 = isset( $cat['category_6'] ) ? $cat['category_6'] : '';
 
 		if ( $category_title_1 ) {
 			$category_1 = term_exists( $category_title_1, $product_cat_tax );
@@ -46,6 +47,14 @@ function billz_wp_sync_get_category_ids( $cats ) {
 								$category_5 = wp_insert_term( $category_title_5, $product_cat_tax, array( 'parent' => $category_4['term_id'] ) );
 							}
 							$cat_ids[] = $category_5['term_id'];
+
+							if ( $category_title_6 ) {
+								$category_6 = term_exists( $category_title_6, $product_cat_tax, $category_5['term_id'] );
+								if ( ! $category_6 ) {
+									$category_6 = wp_insert_term( $category_title_6, $product_cat_tax, array( 'parent' => $category_5['term_id'] ) );
+								}
+								$cat_ids[] = $category_6['term_id'];
+							}
 						}
 					}
 				}
