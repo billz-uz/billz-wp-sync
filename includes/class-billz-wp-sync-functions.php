@@ -5,15 +5,15 @@ function billz_wp_sync_get_category_ids( $cats ) {
 	$product_cat_tax = 'product_cat';
 
 	foreach ( $cats as $cat ) {
-		$category_title_1 = isset( $cat['category_1'] ) ? $cat['category_1'] : '';
-		$category_title_2 = isset( $cat['category_2'] ) ? $cat['category_2'] : '';
-		$category_title_3 = isset( $cat['category_3'] ) ? $cat['category_3'] : '';
-		$category_title_4 = isset( $cat['category_4'] ) ? $cat['category_4'] : '';
-		$category_title_5 = isset( $cat['category_5'] ) ? $cat['category_5'] : '';
-		$category_title_6 = isset( $cat['category_6'] ) ? $cat['category_6'] : '';
+		$category_title_1 = isset( $cat['category_1'] ) ? preg_replace( '/\s+/', ' ', $cat['category_1'] ) : '';
+		$category_title_2 = isset( $cat['category_2'] ) ? preg_replace( '/\s+/', ' ', $cat['category_2'] ) : '';
+		$category_title_3 = isset( $cat['category_3'] ) ? preg_replace( '/\s+/', ' ', $cat['category_3'] ) : '';
+		$category_title_4 = isset( $cat['category_4'] ) ? preg_replace( '/\s+/', ' ', $cat['category_4'] ) : '';
+		$category_title_5 = isset( $cat['category_5'] ) ? preg_replace( '/\s+/', ' ', $cat['category_5'] ) : '';
+		$category_title_6 = isset( $cat['category_6'] ) ? preg_replace( '/\s+/', ' ', $cat['category_6'] ) : '';
 
 		if ( $category_title_1 ) {
-			$category_1 = term_exists( $category_title_1, $product_cat_tax );
+			$category_1 = term_exists( $category_title_1, $product_cat_tax, 0 );
 			if ( ! $category_1 ) {
 				$category_1 = wp_insert_term( $category_title_1, $product_cat_tax );
 			}
