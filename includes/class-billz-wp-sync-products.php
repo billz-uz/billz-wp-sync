@@ -284,7 +284,7 @@ class Billz_Wp_Sync_Products {
 								if ( 0 === $av ) {
 									$args['attributes'][ $av_attr_name ]['term_names'] = array();
 								}
-								$attr_val_term = get_term_by( 'slug', $attr_val, $$av_attr_name );
+								$attr_val_term = get_term_by( 'slug', $attr_val, $av_attr_name );
 								if ( $attr_val_term && false === array_search( $attr_val_term->name, $args['attributes'][ $av_attr_name ]['term_names'] ) ) {
 									$args['attributes'][ $av_attr_name ]['term_names'][] = $attr_val_term->name;
 									$av++;
