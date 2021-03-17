@@ -44,6 +44,7 @@ class Billz_Wp_Sync_Activator {
 			remote_product_id text NOT NULL,
 			type varchar(255) NOT NULL,
 			name text NOT NULL,
+			slug varchar(200),
 			sku text NOT NULL,
 			description longtext NOT NULL,
 			short_description text NOT NULL,
@@ -57,6 +58,7 @@ class Billz_Wp_Sync_Activator {
 			attributes longtext NOT NULL,
 			variations longtext NOT NULL,
 			meta longtext,
+			lang longtext,
 			menu_order int(11) NOT NULL DEFAULT '0',
 			state smallint(6) NOT NULL DEFAULT '0'
 		) $charset_collate;";

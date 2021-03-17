@@ -2,6 +2,7 @@ Filters
 
 add_filter( 'billz_wp_sync_create_product_without_images', '__return_false' );
 add_filter( 'billz_wp_sync_update_product_sku', '__return_true' );
+add_filter( 'billz_wp_sync_update_product_slug', '__return_false' );
 add_filter( 'billz_wp_sync_update_product_images', '__return_true' );
 add_filter( 'billz_wp_sync_update_product_name', '__return_true' );
 add_filter( 'billz_wp_sync_update_product_description', '__return_true' );
