@@ -183,7 +183,14 @@ class Billz_Wp_Sync_Products {
 			$product->set_sku( $args['sku'] );
 		}
 
-		if ( 'variable' === $args['type'] ) {
+		if ( ! empty( $args['slug'] ) && apply_filters( 'billz_wp_sync_update_product_slug', false ) ) {
+			$product->set_slug( $args['slug'] );
+		}
+
+		$is_variable   = 'variable' === $args['type'];
+		$variation_ids = array();
+
+		if ( $is_variable ) {
 			if ( $args['variations'] ) {
 				foreach ( $args['variations'] as $variation ) {
 					$variation_id = $this->get_variation_id_by( '_remote_product_id', $variation['remote_product_id'], $product_id );
@@ -241,6 +248,47 @@ class Billz_Wp_Sync_Products {
 							update_post_meta( $variation_id, $meta_key, $meta_value );
 						}
 					}
+					if ( $variation['qty'] > 0 ) {
+						$variation_ids[] = $variation_id;
+						if ( $variation_exist ) {
+							wp_update_post(
+								array(
+									'ID'          => $variation_id,
+									'post_status' => 'publish',
+								)
+							);
+						}
+					}
+				}
+
+				$all_variation_ids    = $product->get_children();
+				$delete_variation_ids = array_diff( $all_variation_ids, $variation_ids );
+				if ( $delete_variation_ids ) {
+					foreach ( $delete_variation_ids as $delete_variation_id ) {
+						wp_update_post(
+							array(
+								'ID'          => $delete_variation_id,
+								'post_status' => 'private',
+							)
+						);
+					}
+				}
+				$available_variations            = $product->get_available_variations();
+				$available_variations_attributes = array();
+				if ( $available_variations ) {
+					foreach ( $available_variations as $available_variation ) {
+						if ( ! empty( $available_variation['attributes'] ) ) {
+							$av = 0;
+							foreach ( $available_variation['attributes'] as $attr_key => $attr_val ) {
+								$av_attr_name = str_replace( 'attribute_', '', $attr_key);
+								if ( 0 === $av ) {
+									$args['attributes'][ $av_attr_name ]['term_names'] = array();
+								}
+								$args['attributes'][ $av_attr_name ]['term_names'][] = $attr_val;
+								$av++;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -275,7 +323,7 @@ class Billz_Wp_Sync_Products {
 		}
 
 		if ( apply_filters( 'billz_wp_sync_update_product_attributes', true ) && isset( $args['attributes'] ) ) {
-			$product->set_attributes( $this->get_attribute_ids( $args['attributes'], true, $product_id ) );
+			$product->set_attributes( $this->get_attribute_ids( $args['attributes'], ! $is_variable, $product_id ) );
 		}
 
 		if ( isset( $args['default_attributes'] ) ) {
@@ -360,6 +408,10 @@ class Billz_Wp_Sync_Products {
 			$product->set_manage_stock( true );
 			$product->set_stock_quantity( $args['qty'] );
 			$product->set_stock_status( 'instock' );
+		}
+
+		if ( ! empty( $args['slug'] ) ) {
+			$product->set_slug( $args['slug'] );
 		}
 
 		if ( isset( $args['attributes'] ) ) {
