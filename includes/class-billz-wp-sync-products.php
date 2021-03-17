@@ -276,16 +276,19 @@ class Billz_Wp_Sync_Products {
 				$available_variations            = $product->get_available_variations();
 				$available_variations_attributes = array();
 				if ( $available_variations ) {
+					$av = 0;
 					foreach ( $available_variations as $available_variation ) {
 						if ( ! empty( $available_variation['attributes'] ) ) {
-							$av = 0;
 							foreach ( $available_variation['attributes'] as $attr_key => $attr_val ) {
-								$av_attr_name = str_replace( 'attribute_', '', $attr_key);
+								$av_attr_name = str_replace( 'attribute_', '', $attr_key );
 								if ( 0 === $av ) {
 									$args['attributes'][ $av_attr_name ]['term_names'] = array();
 								}
-								$args['attributes'][ $av_attr_name ]['term_names'][] = $attr_val;
-								$av++;
+								$attr_val_term = get_term_by( 'slug', $attr_val, $$av_attr_name );
+								if ( $attr_val_term && false === array_search( $attr_val_term->name, $args['attributes'][ $av_attr_name ]['term_names'] ) ) {
+									$args['attributes'][ $av_attr_name ]['term_names'][] = $attr_val_term->name;
+									$av++;
+								}
 							}
 						}
 					}
