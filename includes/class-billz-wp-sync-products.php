@@ -187,7 +187,7 @@ class Billz_Wp_Sync_Products {
 			$product->set_slug( $args['slug'] );
 		}
 
-		$is_variable   = 'variable' === $args['type'];
+		$is_variable   = 'variable' === $exist_product['type'];
 		$variation_ids = array();
 
 		if ( $is_variable ) {
@@ -250,27 +250,29 @@ class Billz_Wp_Sync_Products {
 					}
 					if ( $variation['qty'] > 0 ) {
 						$variation_ids[] = $variation_id;
-						if ( $variation_exist ) {
-							wp_update_post(
-								array(
-									'ID'          => $variation_id,
-									'post_status' => 'publish',
-								)
-							);
-						}
 					}
 				}
 
-				$all_variation_ids    = $product->get_children();
-				$delete_variation_ids = array_diff( $all_variation_ids, $variation_ids );
-				if ( $delete_variation_ids ) {
-					foreach ( $delete_variation_ids as $delete_variation_id ) {
-						wp_update_post(
-							array(
-								'ID'          => $delete_variation_id,
-								'post_status' => 'private',
-							)
-						);
+				$check_variation_ids = $product->get_children();
+
+				if ( $check_variation_ids ) {
+					foreach ( $check_variation_ids as $check_variation_id ) {
+						$check_variation_qty = get_post_meta( $check_variation_id, '_stock', true);
+						if ( $check_variation_qty ) {
+							wp_update_post(
+								array(
+									'ID'          => $check_variation_id,
+									'post_status' => 'publish',
+								)
+							);
+						} else {
+							wp_update_post(
+								array(
+									'ID'          => $check_variation_id,
+									'post_status' => 'private',
+								)
+							);
+						}
 					}
 				}
 				$available_variations            = $product->get_available_variations();
