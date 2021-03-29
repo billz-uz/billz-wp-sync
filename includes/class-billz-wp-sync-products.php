@@ -187,7 +187,7 @@ class Billz_Wp_Sync_Products {
 			$product->set_slug( $args['slug'] );
 		}
 
-		$is_variable   = 'variable' === $exist_product['type'];
+		$is_variable   = 'variable' === $args['type'];
 		$variation_ids = array();
 
 		if ( $is_variable ) {
@@ -250,46 +250,46 @@ class Billz_Wp_Sync_Products {
 					}
 					if ( $variation['qty'] > 0 ) {
 						$variation_ids[] = $variation_id;
-					}
-				}
-
-				$check_variation_ids = $product->get_children();
-
-				if ( $check_variation_ids ) {
-					foreach ( $check_variation_ids as $check_variation_id ) {
-						$check_variation_qty = get_post_meta( $check_variation_id, '_stock', true);
-						if ( $check_variation_qty ) {
+						if ( $variation_exist ) {
 							wp_update_post(
 								array(
-									'ID'          => $check_variation_id,
+									'ID'          => $variation_id,
 									'post_status' => 'publish',
-								)
-							);
-						} else {
-							wp_update_post(
-								array(
-									'ID'          => $check_variation_id,
-									'post_status' => 'private',
 								)
 							);
 						}
 					}
 				}
-				$available_variations            = $product->get_available_variations();
-				$available_variations_attributes = array();
-				if ( $available_variations ) {
-					$av = 0;
-					foreach ( $available_variations as $available_variation ) {
-						if ( ! empty( $available_variation['attributes'] ) ) {
-							foreach ( $available_variation['attributes'] as $attr_key => $attr_val ) {
-								$av_attr_name = str_replace( 'attribute_', '', $attr_key );
-								if ( 0 === $av ) {
-									$args['attributes'][ $av_attr_name ]['term_names'] = array();
-								}
-								$attr_val_term = get_term_by( 'slug', $attr_val, $av_attr_name );
-								if ( $attr_val_term && false === array_search( $attr_val_term->name, $args['attributes'][ $av_attr_name ]['term_names'] ) ) {
-									$args['attributes'][ $av_attr_name ]['term_names'][] = $attr_val_term->name;
-									$av++;
+
+				if ( apply_filters( 'billz_wp_sync_disable_outofstock_variations', false ) ) {
+					$all_variation_ids    = $product->get_children();
+					$delete_variation_ids = array_diff( $all_variation_ids, $variation_ids );
+					if ( $delete_variation_ids ) {
+						foreach ( $delete_variation_ids as $delete_variation_id ) {
+							wp_update_post(
+								array(
+									'ID'          => $delete_variation_id,
+									'post_status' => 'private',
+								)
+							);
+						}
+					}
+					$available_variations            = $product->get_available_variations();
+					$available_variations_attributes = array();
+					if ( $available_variations ) {
+						$av = 0;
+						foreach ( $available_variations as $available_variation ) {
+							if ( ! empty( $available_variation['attributes'] ) ) {
+								foreach ( $available_variation['attributes'] as $attr_key => $attr_val ) {
+									$av_attr_name = str_replace( 'attribute_', '', $attr_key );
+									if ( 0 === $av ) {
+										$args['attributes'][ $av_attr_name ]['term_names'] = array();
+									}
+									$attr_val_term = get_term_by( 'slug', $attr_val, $av_attr_name );
+									if ( $attr_val_term && false === array_search( $attr_val_term->name, $args['attributes'][ $av_attr_name ]['term_names'] ) ) {
+										$args['attributes'][ $av_attr_name ]['term_names'][] = $attr_val_term->name;
+										$av++;
+									}
 								}
 							}
 						}
